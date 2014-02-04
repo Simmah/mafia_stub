@@ -1,0 +1,447 @@
+//делалось в личных целях, потому комментарии лишь нужные мне лично
+
+		ref class Maf
+		{
+		public:					
+			int Target;
+			int SecTarget;
+			int Order;
+			bool Enabled;
+			bool Alive;			
+			bool Killed;
+			bool Followed;
+			bool Protected;
+			bool ProtectedByT;
+			bool ProtectedByM;
+			bool SpecialEvent;
+			String^ Player;
+			Maf()
+			{
+				Enabled=true;
+				Alive=true;
+				Target=0;
+				SecTarget=0;
+				Order=0;
+				Killed=false;
+				Followed=false;
+				Protected=false;
+				ProtectedByT=false;
+				ProtectedByM=false;
+				SpecialEvent=false;
+			}	
+		};
+
+		ref class Statistics
+		{
+		public:
+			int DShoes;
+			int KShoes;
+			int Day;
+			int Protections;
+			bool Maf;
+			bool Abil;
+			Statistics()
+			{
+				DShoes=1;
+				KShoes=1;
+				Day=1;
+				Protections=0;
+				Maf=false;
+				Abil=false;
+			}
+			int GetDShoes(void)
+			{
+				int i=DShoes;
+				if(DShoes<3)
+					DShoes++;
+				else
+					DShoes=1;
+				return i;
+			}
+			int GetKShoes(void)
+			{
+				int i=KShoes;
+				if(KShoes<5)
+					KShoes++;
+				else
+					KShoes=1;
+				return i;
+			}
+			void Reset(void)
+			{
+				DShoes=1;
+				KShoes=1;
+			}
+		};
+
+		void Com(int com,System::Windows::Forms::Label^lblCom)
+		{
+			if(Players[com]->Alive&&Players[com]->Enabled==true&&Players[com]->Target!=0)
+			{
+				 if(radioButton1->Checked)
+				 {
+					 if((Players[com]->Target>12||(Players[com]->Target==5&&Players[4]->SpecialEvent)||(Players[com]->Target==6&&Players[5]->SpecialEvent))&&Players[Players[com]->Target-1]->Protected==false)
+					 {
+						 Stat->Maf=true;
+						 lblCom->Text="Немирный статус";
+					 }
+					 else
+					 {
+						 Stat->Maf=false;
+						 lblCom->Text="Мирный статус";
+					 }
+				 }
+				 else if(radioButton2->Checked)
+				 {
+					 if((Players[com]->Target>12||(Players[com]->Target==5&&Players[4]->SpecialEvent)||(Players[com]->Target==6&&Players[5]->SpecialEvent))&&Players[Players[com]->Target-1]->Protected==false)
+						 Players[Players[com]->Target-1]->Killed=true;
+					 else if(Players[Players[com]->Target-1]->Protected==false)
+						 Players[com]->Killed=true;
+				 }
+			}
+		}
+
+		void Serj(int serj,int com,System::Windows::Forms::Label^lblSerj)
+		{
+			if(Players[serj]->Alive&&Players[serj]->Enabled==true&&Players[serj]->Target!=0)
+				 if(Players[serj]->SpecialEvent)
+					 if(Players[com]->Alive)
+					 {
+						 if(radioButton1->Checked)
+						 {
+							 if((Players[serj]->Target>12||(Players[serj]->Target==5&&Players[4]->SpecialEvent)||(Players[serj]->Target==6&&Players[5]->SpecialEvent))&&Players[Players[serj]->Target-1]->Protected==false)
+								Players[Players[serj]->Target-1]->Killed=true;
+							else if(Players[Players[com]->Target-1]->Protected==false)
+								Players[serj]->Killed=true;
+						 }
+						 else if(radioButton2->Checked)
+						 {
+							 if((Players[serj]->Target>12||(Players[serj]->Target==5&&Players[4]->SpecialEvent)||(Players[serj]->Target==6&&Players[5]->SpecialEvent))&&Players[Players[serj]->Target-1]->Protected==false)
+								Stat->Maf=true;
+							else
+								Stat->Maf=false;
+						 }
+					 }
+					 else
+					{ 
+						if(radioButton2->Checked)
+						{
+							 if((Players[serj]->Target>12||(Players[serj]->Target==5&&Players[4]->SpecialEvent)||(Players[serj]->Target==6&&Players[5]->SpecialEvent))&&Players[Players[serj]->Target-1]->Protected==false)
+								Players[Players[serj]->Target-1]->Killed=true;
+							else if(Players[Players[com]->Target-1]->Protected==false)
+								Players[serj]->Killed=true;
+						}
+						 else if(radioButton1->Checked)
+						 {
+							 if((Players[serj]->Target>12||(Players[serj]->Target==5&&Players[4]->SpecialEvent)||(Players[serj]->Target==6&&Players[5]->SpecialEvent))&&Players[Players[serj]->Target-1]->Protected==false)
+								Stat->Maf=true;
+							else
+								Stat->Maf=false;
+						}
+					 }
+				else
+					if(Players[serj]->Target==(com+1))
+						Players[serj]->SpecialEvent=true;
+		}
+
+		void Cop(int cop,int com,int serj,int bdgrd,int lustr,System::Windows::Forms::Label^lblCop,System::Windows::Forms::Label^lblBdgrd,System::Windows::Forms::Label^lblLustr)
+		{
+			 if(Players[cop]->Alive&&Players[cop]->Enabled==true&&Players[cop]->Target!=0)
+			 {
+				 if((Players[cop]->Target==(com+1)||Players[cop]->Target==(serj+1))&&Players[Players[cop]->Target-1]->Protected==false)
+				 {
+					 if(Players[Players[cop]->Target-1]->ProtectedByT)
+					 {
+						 if(Stat->Protections<=3)
+						 {
+							 Stat->Protections++;
+							 lblCop->Text="Ход не удался, напоролся на телохранителя. ";
+							 lblBdgrd->Text="Ход удался, защита пригодилась. ";
+							 
+						 }
+						 else
+						 {
+							 Players[cop]->Killed=true;
+							 Players[bdgrd]->Killed=true;
+							 lblCop->Text="Ход не удался, напоролся на телохранителя. ";
+							 lblBdgrd->Text="Ход удался, защита пригодилась. ";
+						 }
+					 }
+					 //else if(Players[Players[cop]->Target-1]->ProtectedByM)
+					 else 
+					 {
+						 Players[Players[cop]->Target-1]->Killed=true;
+						 lblCop->Text="Ход удался. ";
+					 }
+				 }
+				 else if(Players[cop]->Target==(lustr+1))
+				 {
+					 if(Players[cop]->Protected)
+					 {
+						 if((rand()%100)<50)
+						 	lblLustr->Text="К тебе кто-то приходил ночью. ";							 
+						 else
+							lblLustr->Text="К тебе ночью приходил "+Players[cop]->Player+ ". ";
+					 }
+					 else
+						 lblLustr->Text="К тебе ночью приходил "+Players[cop]->Player+ ". ";
+					 lblCop->Text="Ход не удался. ";
+				 }
+				 else
+					 lblCop->Text="Ход не удался. ";
+
+					 /*Players[Players[15]->Target-1]->Killed=true;
+					 if(Players[15]->Target==1&&this->radioButton1->Checked&&Players[Players[0]->Target-1]->Protected==false)
+						 Players[Players[0]->Target-1]->Killed=true;
+					 if(Players[15]->Target==2&&Players[0]->Alive&&this->radioButton2->Checked&&Players[Players[1]->Target-1]->Protected==false)
+						 Players[Players[1]->Target-1]->Killed=true;*/
+
+				 }
+		}
+
+		void BDoc(int bdoc,int bdgrd,int lustr,System::Windows::Forms::Label^lblBDoc,System::Windows::Forms::Label^lblBdgrd,System::Windows::Forms::Label^lblLustr,int ord)
+		{
+			if(Players[bdoc]->Order==ord&&Players[bdoc]->Alive&&Players[bdoc]->Enabled&&Players[bdoc]->Target!=0)
+				 {
+					  if(Players[Players[bdoc]->Target-1]->ProtectedByT)
+					 {
+							 if(Stat->Protections<=3)
+							 {
+								Stat->Protections++;
+								lblBDoc->Text="Ход не удался, напоролся на телохранителя. ";
+								lblBdgrd->Text="Ход удался, защита пригодилась. ";
+							 }
+							else
+							{
+								Players[bdoc]->Killed=true;
+								Players[bdgrd]->Killed=true;
+								lblBDoc->Text="Ход не удался, напоролся на телохранителя. ";
+								lblBdgrd->Text="Ход удался, защита пригодилась. ";
+							}
+						}
+						//else if(Players[Players[15]->Target-1]->ProtectedByM)
+						 else if(Players[Players[bdoc]->Target-1]->Protected)
+						 {
+							lblBDoc->Text="Ход не удался. ";
+						 }					 
+						else if(Players[bdoc]->Target==(lustr+1))
+						{
+							Players[bdoc]->Killed=true;
+							Players[lustr]->Killed=true;
+						 }
+						else
+						{
+							Players[Players[bdoc]->Target-1]->Killed=true;
+							lblBDoc->Text="Ход удался. ";
+						}
+				 }
+		}
+
+		Statistics^Stat;
+		 array<Maf^>^Players;
+
+	private: System::Void comboBox1_SelectionChangeCommitted(System::Object^  sender, System::EventArgs^  e) {
+				if(this->comboBox1->SelectedIndex>0&&Players[this->listBox1->SelectedIndex]->Alive&&Players[this->comboBox1->SelectedIndex-1]->Alive)
+				 {					 
+						 if(this->listBox1->SelectedIndex==12)//босс1
+							 if(this->comboBox1->SelectedIndex>13&&this->comboBox1->SelectedIndex<17)
+								 Players[this->listBox1->SelectedIndex]->Target=this->comboBox1->SelectedIndex;
+							 else
+								 Players[this->listBox1->SelectedIndex]->Target=0;
+						 else if(this->listBox1->SelectedIndex==16)//босс2
+							 if(this->comboBox1->SelectedIndex>17&&this->comboBox1->SelectedIndex<21)
+								 Players[this->listBox1->SelectedIndex]->Target=this->comboBox1->SelectedIndex;
+							 else
+								 Players[this->listBox1->SelectedIndex]->Target=0;
+						 else
+						 {
+							 Players[this->listBox1->SelectedIndex]->Target=this->comboBox1->SelectedIndex;
+							 if(this->listBox1->SelectedIndex==4||this->listBox1->SelectedIndex==6||this->listBox1->SelectedIndex==19)
+								 if(Players[this->listBox1->SelectedIndex]->Order==0)
+									 Players[this->listBox1->SelectedIndex]->Order=Stat->GetDShoes();
+							 if(this->listBox1->SelectedIndex==13||this->listBox1->SelectedIndex==18||this->listBox1->SelectedIndex==20||this->listBox1->SelectedIndex==22||this->listBox1->SelectedIndex==24)
+								 if(Players[this->listBox1->SelectedIndex]->Order==0)
+									 Players[this->listBox1->SelectedIndex]->Order=Stat->GetKShoes();
+						 }						 
+				 }
+				 else
+				 {
+					 Players[this->listBox1->SelectedIndex]->Target=0;	
+					 this->comboBox1->SelectedIndex=0;
+				 }
+				this->listBox2->Items->Clear();
+				for(int i=0;i<(this->listBox1->Items->Count);i++)
+				{
+					if(i==9)
+						this->listBox2->Items->Add(this->comboBox3->Items[this->comboBox3->SelectedIndex]->ToString());
+					else if(i==10)
+						this->listBox2->Items->Add(this->comboBox4->Items[this->comboBox4->SelectedIndex]->ToString());
+					else
+						this->listBox2->Items->Add(this->comboBox1->Items[Players[i]->Target]->ToString()+"   "+this->comboBox1->Items[Players[i]->SecTarget]->ToString());
+				}
+			 }
+	private: System::Void Form1_Load(System::Object^  sender, System::EventArgs^  e) {
+				 Stat=gcnew Statistics;
+				 Players=gcnew array<Maf^>(this->listBox1->Items->Count);
+				 for(int i=0;i<(this->listBox1->Items->Count);i++)
+					 Players[i]=gcnew Maf;
+				 this->listBox1->SelectedIndex=0;
+				 this->comboBox1->SelectedIndex=0;
+				 this->comboBox2->SelectedIndex=0;
+				 this->comboBox3->SelectedIndex=0;
+				 this->comboBox4->SelectedIndex=0;
+			 }
+private: System::Void listBox1_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+			 if(this->listBox1->SelectedIndex==9||this->listBox1->SelectedIndex==10)
+				 this->comboBox1->Visible=false;
+			 else
+				 this->comboBox1->Visible=true;
+			 if(this->listBox1->SelectedIndex==5||this->listBox1->SelectedIndex==11||this->listBox1->SelectedIndex==21)
+				 this->comboBox2->Visible=true;
+			 else
+				 this->comboBox2->Visible=false;
+			 if(this->listBox1->SelectedIndex==0||(this->listBox1->SelectedIndex==1&&Players[this->listBox1->SelectedIndex]->SpecialEvent==true))
+			 {
+				 this->radioButton1->Visible=true;
+				 this->radioButton2->Visible=true;
+			 }
+			 else
+				 {
+				 this->radioButton1->Visible=false;
+				 this->radioButton2->Visible=false;
+			 }
+			 if(this->listBox1->SelectedIndex==9)
+				 this->comboBox3->Visible=true;
+			 else
+				 this->comboBox3->Visible=false;
+			 if(this->listBox1->SelectedIndex==10)
+				 this->comboBox4->Visible=true;
+			 else
+				 this->comboBox4->Visible=false;
+			 this->comboBox1->SelectedIndex=Players[this->listBox1->SelectedIndex]->Target;
+			 if(this->comboBox2->Visible==true)
+				 this->comboBox2->SelectedIndex=Players[this->listBox1->SelectedIndex]->SecTarget;
+			 if(Players[this->listBox1->SelectedIndex]->Alive)
+				 this->labelAlive->Text="Жив";
+			 else
+				 this->labelAlive->Text="Мертв";
+		 }
+private: System::Void comboBox2_SelectionChangeCommitted(System::Object^  sender, System::EventArgs^  e) {
+			 if(this->comboBox2->SelectedIndex>0)
+				 {
+					 Players[this->listBox1->SelectedIndex]->SecTarget=this->comboBox2->SelectedIndex;		
+					 
+				 }
+				 else
+				 {
+					 Players[this->listBox1->SelectedIndex]->SecTarget=0;					 
+				 }
+			 this->listBox2->Items->Clear();
+			 for(int i=0;i<(this->listBox1->Items->Count);i++)
+				{
+					if(i==9)
+						this->listBox2->Items->Add(this->comboBox3->Items[this->comboBox3->SelectedIndex]->ToString());
+					else if(i==10)
+						this->listBox2->Items->Add(this->comboBox4->Items[this->comboBox4->SelectedIndex]->ToString());
+					else
+						this->listBox2->Items->Add(this->comboBox1->Items[Players[i]->Target]->ToString()+"   "+this->comboBox1->Items[Players[i]->SecTarget]->ToString());
+				}
+		 }
+private: System::Void comboBox4_SelectedIndexChanged(System::Object^  sender, System::EventArgs^  e) {
+			 this->listBox2->Items->Clear();
+			 for(int i=0;i<(this->listBox1->Items->Count);i++)
+				{
+					if(i==9)
+						this->listBox2->Items->Add(this->comboBox3->Items[this->comboBox3->SelectedIndex]->ToString());
+					else if(i==10)
+						this->listBox2->Items->Add(this->comboBox4->Items[this->comboBox4->SelectedIndex]->ToString());
+					else
+						this->listBox2->Items->Add(this->comboBox1->Items[Players[i]->Target]->ToString()+"   "+this->comboBox1->Items[Players[i]->SecTarget]->ToString());
+				}
+		 }
+private: System::Void comboBox3_SelectionChangeCommitted(System::Object^  sender, System::EventArgs^  e) {
+			 this->listBox2->Items->Clear();
+			 for(int i=0;i<(this->listBox1->Items->Count);i++)
+				{
+					if(i==9)
+						this->listBox2->Items->Add(this->comboBox3->Items[this->comboBox3->SelectedIndex]->ToString());
+					else if(i==10)
+						this->listBox2->Items->Add(this->comboBox4->Items[this->comboBox4->SelectedIndex]->ToString());
+					else
+						this->listBox2->Items->Add(this->comboBox1->Items[Players[i]->Target]->ToString()+"   "+this->comboBox1->Items[Players[i]->SecTarget]->ToString());
+				}
+		 }
+private: System::Void button1_Click(System::Object^  sender, System::EventArgs^  e) {
+			 //Players[23]			 
+			 //if(Players[21]->Target!=0)
+			 //Players[11]
+			 if(Players[17]->Alive&&Players[17]->Target!=0)//вор
+				 Players[Players[17]->Target-1]->Enabled=false;
+			 //Players[5]
+			 //босс1:
+			 if(Players[12]->Alive&&Players[12]->Enabled==true&&Players[12]->Target!=0)
+				 Players[Players[12]->Target-1]->Protected=true;
+			 //босс2:
+			 if(Players[16]->Alive&&Players[16]->Enabled==true&&Players[16]->Target!=0)
+				 Players[Players[16]->Target-1]->Protected=true;
+			 //наблюдатель:
+			 if(Players[7]->Alive&&Players[7]->Enabled==true&&Players[7]->Target!=0)
+				 Players[Players[7]->Target-1]->Followed=true;
+			 //телохран:
+			 if(Players[2]->Alive&&Players[2]->Enabled==true&&Players[2]->Target!=0)
+				 Players[Players[2]->Target-1]->ProtectedByT=true;
+			 //мститель:
+			 if(Players[8]->Alive&&Players[8]->Enabled==true&&Players[8]->Target!=0)
+				 Players[Players[8]->Target-1]->ProtectedByM=true;
+			 for(int i=1;i<=3;i++)
+			 {
+				 //алк:
+				 if(Players[4]->Order==i&&Players[4]->Alive&&Players[4]->Enabled==true&&Players[4]->Target!=0&&Players[4]->Target!=20)
+					 Players[Players[4]->Target-1]->Enabled=false;
+				 //любов:
+				 else if(Players[6]->Order==i&&Players[6]->Alive&&Players[6]->Enabled==true&&Players[6]->Target!=0)
+					 Players[Players[6]->Target-1]->Enabled=false;
+				 //громила:
+				 else if(Players[19]->Order==i&&Players[19]->Alive&&Players[19]->Enabled==true&&Players[19]->Target!=0)
+					 Players[Players[19]->Target-1]->Enabled=false;
+			 }
+			  //ком:
+			 Com(iCom,this->labelCom);
+			
+			  //серж:
+			 Serj(iSerj,iCom,this->labelSerj);
+			 
+			  //коп:
+			 Cop(iCop,iCom,iSerj,iBdgrd,iLustr,this->labelCop,this->labelBdgrd,this->labelLustr);
+			
+			 
+			 for(int i=1;i<=5;i++)
+			 {
+				 //ЧД
+				 BDoc(iBDoc,iBdgrd,iLustr,this->labelBDoc,this->labelBdgrd,this->labelLustr,i);
+				//профи
+
+				 //ман
+
+				 //кил
+				
+			 }
+
+			for(int i=0;i<(this->listBox1->Items->Count);i++)
+				if(Players[i]->Killed)
+					Players[i]->Alive=false;
+			for(int i=0;i<(this->listBox1->Items->Count);i++)
+				Players[i]->Target=0;
+			this->listBox2->Items->Clear();
+			for(int i=0;i<(this->listBox1->Items->Count);i++)
+				if(Players[i]->Alive)
+				{
+					listBox1->SelectedIndex=i;
+					break;
+				}
+			Stat->Day++;
+			this->labelDay->Text="День "+Stat->Day;
+			/*for(int i=0;i<(this->listBox1->Items->Count);i++)
+				if(!Players[i]->Alive)
+					this->listBox1->Font->Bold=true;*/
+		 }
